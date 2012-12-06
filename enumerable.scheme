@@ -1,0 +1,161 @@
+(define all?
+  (lambda (func enum)
+    (cond
+      ((null? enum) #t)
+      ((eq? #t (func (car enum))) 
+        (all? func (cdr enum)))
+      (else #f))))
+
+(define any?
+  (lambda (func enum)
+    (cond
+      ((null? enum) #f)
+      ((eq? #t (func (car enum))) #t)
+      (else
+        (any? func (cdr enum))))))
+
+(define collect
+  (lambda (func enum)
+    (if
+      (null? enum)
+      '()
+      (cons (func (car enum)) (collect func (cdr enum))))))
+
+(define count
+  (lambda (enum)
+    (cond
+      ((null? enum) 0)
+      (else
+        (+ 1 (count (cdr enum)))))))
+
+(define reject 
+  (lambda (func enum)
+    (cond
+      ((null? enum) '())
+      ((eq? (func (car enum)) #t) (reject func (cdr enum)))
+      (else
+        (cons (car enum) (reject func (cdr enum)))))))
+
+(define take-while
+  (lambda (func enum)
+    (cond
+      ((null? enum) '())
+      ((eq? (func (car enum)) #t) (cons (car enum) (take-while func (cdr enum))))
+      (else
+        '()))))
+      
+(define zip
+  (lambda (enum1 enum2)
+    (cond
+      ((or (null? enum1) (null? enum2)) '())
+      (else
+        (cons (list (car enum1) (car enum2)) (zip (cdr enum1) (cdr enum2)))))))
+
+(define one?
+  (lambda (func enum)
+    (let ((matches (reject (lambda (x) (not (func x))) enum)))
+              (eq? 1 (length matches)))))
+
+(define partition
+  (lambda (func enum)
+    (cond
+      ((null? enum) (list '() '()))
+      (else
+        (let* ((result (partition func (cdr enum)))
+              (true (car result))
+              (false (car (cdr result))))
+          (if (func (car enum))
+            (list (cons (car enum) true) false)
+            (list true (cons (car enum) false))))))))
+
+(define inject
+  (lambda (fn memo enum)
+    (cond
+      ((null? enum) memo)
+      (else
+        (inject fn (fn memo (car enum)) (cdr enum))))))
+
+(define max 
+  (lambda (enum)
+    (cond
+      ((null? enum) '())
+      ((eq? (length enum) 1) (car enum))
+      (else
+        (let ((a (car enum))
+             (b (max (cdr enum))))
+             (if (< a  b)
+                 b
+                 a))))))
+
+(define multiinsertR
+  (lambda (old new lat)
+    (cond
+      ((null? lat) '())
+      ((equal? (car lat) old) (cons (car lat) (cons new (multiinsertR old new (cdr lat)))))
+      (else
+        (cons (car lat) (multiinsertR old new (cdr lat)))))))
+
+(define multiinsertL
+  (lambda (old new lat)
+    (cond
+      ((null? lat) '())
+      ((equal? (car lat) old) (cons new (cons (car lat) (multiinsertL old new (cdr lat)))))
+      (else
+        (cons (car lat) (multiinsertL old new (cdr lat)))))))
+
+(define subst
+  (lambda (old new lat)
+    (cond
+      ((null? lat) '())
+      ((equal? (car lat) old) (cons new (cdr lat)))
+      (else
+        (cons (car lat) (subst old new (cdr lat)))))))
+
+(define multisubst
+  (lambda (old new lat)
+    (cond
+      ((null? lat) '())
+      ((equal? (car lat) old) (cons new (multisubst old new (cdr lat))))
+      (else
+        (cons (car lat) (multisubst old new (cdr lat)))))))
+
+(define insertR
+  (lambda (old new lat)
+    (cond
+      ((null? lat) '())
+      ((equal? (car lat) old) (cons (car lat) (cons new (cdr lat))))
+      (else
+        (cons (car lat) (insertR old new (cdr lat)))))))
+
+(define drop
+  (lambda (amount enum)
+    (cond
+      ((null? enum) '())
+      ((<= amount 0) enum)
+      (else
+        (drop (- amount 1) (cdr enum))))))
+
+(define take
+  (lambda (amount enum)
+    (cond
+      ((or (null? enum) (<= amount 0)) '())
+      (else
+        (cons (car enum) (take (- amount 1) (cdr enum)))))))
+
+(define find
+  (lambda (func enum)
+    (cond
+      ((null? enum) #f)
+      ((eq? #t (func (car enum))) (car enum))
+      (else
+        (find func (cdr enum))))))
+
+(define include?
+  (lambda (x enum)
+    (cond
+      ((null? enum) #f)
+      ((eq? x (car enum)) #t)
+      (else
+        (include? x (cdr enum))))))
+
+
